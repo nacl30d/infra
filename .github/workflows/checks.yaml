@@ -1,0 +1,30 @@
+---
+name: checks
+
+on:
+  push:
+    branches:
+      - main
+  pull_request: ~
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        entrypoint:
+          - 'terraform/cloudflare/nacl30d/nacl30d_com'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Format
+        working-directory: terraform
+        run: terraform fmt -check -recursive
+
+      - name: Validate
+        working-directory: ${{ matrix.entrypoint }}
+        run: terraform init -cloud=false && terraform validate
